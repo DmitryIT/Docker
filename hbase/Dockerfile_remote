@@ -1,0 +1,52 @@
+FROM openjdk:8-alpine
+
+RUN set -euxo pipefail && \
+     apk add --no-cache wget bash tar make python git gnuplot
+
+ENV JAVA_HOME=/usr
+ENV HBASE_VERSION=1.2.6
+ENV HBASE_URL=http://mirrors.ae-online.de/apache/hbase/$HBASE_VERSION/hbase-$HBASE_VERSION-bin.tar.gz
+
+WORKDIR /
+
+#Install HBase
+RUN wget -t 10 -O "hbase-$HBASE_VERSION-bin.tar.gz" "$HBASE_URL" && \
+         tar xzvf "hbase-$HBASE_VERSION-bin.tar.gz" && \
+           rm -fv "hbase-$HBASE_VERSION-bin.tar.gz" && \
+    mkdir /u01 &&  \
+    mkdir /u01/hbase &&  \
+    mv "hbase-$HBASE_VERSION" hbase && \
+    cd hbase
+
+COPY hbase-site.xml /hbase/conf/
+COPY hbase-env.sh /hbase/conf/
+
+#install OpenTSDB
+ENV OPENTSDB_VERSION=2.3.0
+ENV OPENTSBD_URL=https://github.com/OpenTSDB/opentsdb/releases/download/v$OPENTSDB_VERSION/opentsdb-$OPENTSDB_VERSION.tar.gz
+ENV HBASE_HOME=/hbase
+ENV COMPRESSION=none
+
+RUN cd / && \
+    wget -t 10 -O opentsdb-"$OPENTSDB_VERSION".tar.gz "$OPENTSBD_URL" && \
+         tar xzvf opentsdb-"$OPENTSDB_VERSION".tar.gz && \
+           rm -fv opentsdb-"$OPENTSDB_VERSION".tar.gz && \
+              mv opentsdb-"$OPENTSDB_VERSION" opentsdb && \
+              cd /opentsdb && \
+              mkdir build && \
+              cp -r /opentsdb/third_party /opentsdb/build && \
+              ./build.sh && \
+              mkdir /tmp/opentsdb
+
+COPY opentsdb.conf /opentsdb/build/
+
+EXPOSE 16010 4242 2181 80
+
+ENTRYPOINT (/hbase/bin/start-hbase.sh &) && \
+            sleep 10 && \
+           (/opentsdb/src/create_table.sh &) && \
+            sleep 10 && \
+           (/opentsdb/build/tsdb tsd --config /opentsdb/build/opentsdb.conf &) && \
+            /opentsdb/build/tsdb mkmetric node1.cpu && \
+            bash
+

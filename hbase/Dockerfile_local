@@ -1,0 +1,24 @@
+FROM alpine:3.7
+
+RUN set -euxo pipefail && \
+    apk add --no-cache openjdk8-jre-base bash tar
+
+ENV JAVA_HOME=/usr
+ENV HBASE_VERSION=1.2.6
+
+WORKDIR /
+
+COPY hbase-"$HBASE_VERSION"-bin.tar /
+
+
+RUN tar xfv hbase-"$HBASE_VERSION"-bin.tar &&  \
+    rm -fv "hbase-$HBASE_VERSION-bin.tar"  &&  \
+    mkdir /hbase &&  \
+    mkdir /hbase/hbase
+
+COPY hbase-site.xml /hbase-"$HBASE_VERSION"/conf/
+COPY hbase-env.sh /hbase-"$HBASE_VERSION"/conf/
+
+EXPOSE 16010
+
+ENTRYPOINT /hbase-$HBASE_VERSION/bin/start-hbase.sh && bash
