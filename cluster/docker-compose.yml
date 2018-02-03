@@ -1,0 +1,8 @@
+version: '3'
+services:
+   node1:
+      image: ubuntu:latest
+   node2:
+      image: ubuntu:latest
+   node3:
+      image: ubuntu:latest
