@@ -1,4 +1,5 @@
 *.gz
 *.tar
 *.tgz
+*.zip
 .idea/*
