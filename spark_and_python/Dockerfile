@@ -21,6 +21,6 @@ ENV PYSPARK_PYTHON=python3
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-#ENTRYPOINT ["./entrypoint.sh"]
-CMD ["bash"]
+ENTRYPOINT ["./entrypoint.sh"]
+#CMD ["bash"]
 
