@@ -12,11 +12,11 @@ RUN  tar -xvf spark-2.3.0-bin-hadoop2.7.tar && \
             rm spark-2.3.0-bin-hadoop2.7.tar
 
 ENV SPARK_HOME='/spark-2.3.0-bin-hadoop2.7'
-#ENV PATH=$SPARK_HOME:$PATH
-#ENV PYTHONPATH=$SPARK_HOME/python
-#ENV PYSPARK_DRIVER_PYTHON="jupyter"
-#ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook"
-#ENV PYSPARK_PYTHON=python3
+ENV PATH=$SPARK_HOME:$PATH
+ENV PYTHONPATH=$SPARK_HOME/python
+ENV PYSPARK_DRIVER_PYTHON="jupyter"
+ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+ENV PYSPARK_PYTHON=python3
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
